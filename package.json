@@ -1,0 +1,19 @@
+{
+  "name": "wedding-venue-comparer",
+  "version": "0.1.0",
+  "description": "Desktop app to compare wedding venues (Electron, vanilla JS)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "echo 'Install complete'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^8.0.0"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0"
+  }
+}
