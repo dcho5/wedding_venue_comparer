@@ -13,16 +13,25 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Firebase Admin Setup
-const serviceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL
-};
+const hasServiceAccount =
+  !!process.env.FIREBASE_PROJECT_ID &&
+  !!process.env.FIREBASE_PRIVATE_KEY &&
+  !!process.env.FIREBASE_CLIENT_EMAIL;
+
+const credential = hasServiceAccount
+  ? admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL
+    })
+  : admin.credential.applicationDefault();
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential,
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
+  databaseURL: process.env.FIREBASE_PROJECT_ID
+    ? `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
+    : undefined
 });
 
 const db = admin.firestore();
