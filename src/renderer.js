@@ -141,9 +141,7 @@ function renderVenues(){
     viewBtn.onclick = (e)=>{ e.stopPropagation(); openDetail(v.id); };
     const editBtn = document.createElement('button'); editBtn.textContent='Edit'; editBtn.className='secondary';
     editBtn.onclick = (e)=>{ e.stopPropagation(); openEdit(v.id); };
-    const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='btn-danger';
-    delBtn.onclick = async (e)=>{ e.stopPropagation(); if(confirm('Delete venue?')){ await api.deleteVenue(v.id); loadVenues(); }};
-    actions.appendChild(viewBtn); actions.appendChild(editBtn); actions.appendChild(delBtn);
+    actions.appendChild(viewBtn); actions.appendChild(editBtn);
     card.appendChild(actions);
 
     container.appendChild(card);

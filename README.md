@@ -91,7 +91,3 @@ Per Guest = Total ÷ Guest Count
 **Modal issues?** Verify DOM loaded before accessing elements
 
 **Debug Mode:** Open DevTools with Cmd+Option+I (Mac) or Ctrl+Shift+I (Windows/Linux)
-
-## License
-
-MIT - Use freely for your wedding planning! 💒

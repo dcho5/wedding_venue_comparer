@@ -1,0 +1,13 @@
+// Firebase Storage Security Rules
+// Apply these rules in Firebase Console → Storage → Rules tab
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Allow authenticated users to upload/read/delete their own files
+    match /{userId}/{allPaths=**} {
+      allow read, write, delete: if request.auth.uid == userId;
+    }
+  }
+}
