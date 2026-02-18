@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/wedding-venue-comparer/static/css/main.c6223701.css",
-    "main.js": "/wedding-venue-comparer/static/js/main.6ea13dd1.js",
-    "index.html": "/wedding-venue-comparer/index.html",
-    "main.c6223701.css.map": "/wedding-venue-comparer/static/css/main.c6223701.css.map",
-    "main.6ea13dd1.js.map": "/wedding-venue-comparer/static/js/main.6ea13dd1.js.map"
+    "main.css": "/wedding_venue_comparer/static/css/main.c6223701.css",
+    "main.js": "/wedding_venue_comparer/static/js/main.ed470e63.js",
+    "index.html": "/wedding_venue_comparer/index.html",
+    "main.c6223701.css.map": "/wedding_venue_comparer/static/css/main.c6223701.css.map",
+    "main.ed470e63.js.map": "/wedding_venue_comparer/static/js/main.ed470e63.js.map"
   },
   "entrypoints": [
     "static/css/main.c6223701.css",
-    "static/js/main.6ea13dd1.js"
+    "static/js/main.ed470e63.js"
   ]
 }
