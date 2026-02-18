@@ -1,9 +1,9 @@
 {
-  "name": "wedding-venue-comparer-web",
+  "name": "wedding_venue_comparer-web",
   "version": "1.0.0",
   "description": "Web version of Wedding Venue Comparer",
   "private": true,
-  "homepage": "https://dcho5.github.io/wedding-venue-comparer",
+  "homepage": "https://dcho5.github.io/wedding_venue_comparer",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

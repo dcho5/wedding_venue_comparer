@@ -45,9 +45,11 @@ export default function VenueForm({ venue, onSave, onCancel }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Keep notes and name as strings, convert numeric fields to numbers
+    const isStringField = name === 'notes' || name === 'name';
     setFormData(prev => ({
       ...prev,
-      [name]: isNaN(value) ? value : parseFloat(value) || 0
+      [name]: isStringField ? value : (isNaN(value) ? value : parseFloat(value) || 0)
     }));
   };
 
