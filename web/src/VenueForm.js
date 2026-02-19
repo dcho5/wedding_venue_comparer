@@ -1,3 +1,10 @@
+// Utility to format numbers with commas
+function formatNumberWithCommas(value, decimals = 2) {
+  if (value === null || value === undefined || value === '') return '';
+  const num = Number(value);
+  if (isNaN(num)) return value;
+  return num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
 import React, { useState, useEffect } from 'react';
 import { apiClient } from './api';
 
@@ -45,11 +52,15 @@ export default function VenueForm({ venue, onSave, onCancel }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Keep notes and name as strings, convert numeric fields to numbers
+    // Keep notes and name as strings, convert numeric fields to numbers rounded to 2 decimals
     const isStringField = name === 'notes' || name === 'name';
     setFormData(prev => ({
       ...prev,
-      [name]: isStringField ? value : (isNaN(value) ? value : parseFloat(value) || 0)
+      [name]: isStringField
+        ? value
+        : (isNaN(value)
+            ? value
+            : Math.round(parseFloat(value) * 100) / 100 || 0)
     }));
   };
 
@@ -129,7 +140,7 @@ export default function VenueForm({ venue, onSave, onCancel }) {
     (formData.event_insurance || 0) +
     (formData.other_costs || 0);
 
-  const perGuestCost = formData.guest_count > 0 ? (totalCost / formData.guest_count).toFixed(2) : '0.00';
+  const perGuestCost = formData.guest_count > 0 ? totalCost / formData.guest_count : 0;
   const cateringTotal = ((formData.catering_per_person || 0) * (formData.guest_count || 0)) + (formData.catering_flat_fee || 0);
   const barTotal = ((formData.bar_service_rate || 0) * (formData.guest_count || 0)) + (formData.bar_flat_fee || 0);
 
@@ -311,7 +322,7 @@ export default function VenueForm({ venue, onSave, onCancel }) {
                       onKeyDown={handleNumericKeyDown}
                       placeholder="$"
                     />
-                    <div className="muted">${cateringTotal.toFixed(2)}</div>
+                    <div className="muted">${formatNumberWithCommas(cateringTotal)}</div>
                   </div>
                 </div>
 
@@ -342,7 +353,7 @@ export default function VenueForm({ venue, onSave, onCancel }) {
                       onKeyDown={handleNumericKeyDown}
                       placeholder="$"
                     />
-                    <div className="muted">${barTotal.toFixed(2)}</div>
+                    <div className="muted">${formatNumberWithCommas(barTotal)}</div>
                   </div>
                 </div>
 
@@ -403,15 +414,15 @@ export default function VenueForm({ venue, onSave, onCancel }) {
 
               <div className="summary-panel">
                 <div>Summary</div>
-                <div className="total">${totalCost.toFixed(2)}</div>
-                <div className="muted">Per guest: ${perGuestCost}</div>
+                <div className="total">${formatNumberWithCommas(totalCost)}</div>
+                <div className="muted">Per guest: ${formatNumberWithCommas(perGuestCost)}</div>
               </div>
             </div>
           </div>
 
           <div className="form-actions">
             <div className="spacer"></div>
-            <div>Total: <span>${totalCost.toFixed(2)}</span></div>
+            <div>Total: <span>${formatNumberWithCommas(totalCost)}</span></div>
             <button type="submit">Save</button>
             <button type="button" onClick={onCancel}>Cancel</button>
           </div>

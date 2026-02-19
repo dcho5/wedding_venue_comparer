@@ -1,0 +1,43 @@
+# .gitignore for iOS
+
+# Xcode
+xcuserdata/
+*.xcworkspace/
+*.xcodeproj/xcuserdata/
+DerivedData/
+build/
+.DS_Store
+*.swiftpm/
+.swiftpm/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# SPM
+.build/
+*.resolved
+
+# Fastlane
+fastlane/report.xml
+fastlane/screenshots/
+
+# Environment
+**/.env
+.env.local
+GoogleService-Info.plist
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sensitive data
+*.pem
+*.key
+*.p8

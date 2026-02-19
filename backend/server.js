@@ -96,14 +96,27 @@ app.post('/api/venues', async (req, res) => {
     const uid = req.headers['x-user-id'];
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
 
+    // Filter out null values and the id field to keep database clean
+    const cleanData = Object.entries(req.body).reduce((acc, [key, value]) => {
+      if (value !== null && key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    if (!('photos' in cleanData)) {
+      cleanData.photos = [];
+    }
+
     const venue = {
-      ...req.body,
+      ...cleanData,
       created_at: admin.firestore.FieldValue.serverTimestamp(),
       updated_at: admin.firestore.FieldValue.serverTimestamp()
     };
 
     const docRef = await db.collection('users').doc(uid).collection('venues').add(venue);
     const doc = await docRef.get();
+    // Don't include id in document data - client gets it from docRef.id
     res.json({ id: docRef.id, ...doc.data() });
   } catch (error) {
     console.error('Error creating venue:', error);
@@ -118,8 +131,17 @@ app.put('/api/venues/:venueId', async (req, res) => {
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
 
     const { venueId } = req.params;
+    
+    // Filter out null values and the id field to keep database clean
+    const cleanData = Object.entries(req.body).reduce((acc, [key, value]) => {
+      if (value !== null && key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+    
     const updates = {
-      ...req.body,
+      ...cleanData,
       updated_at: admin.firestore.FieldValue.serverTimestamp()
     };
 

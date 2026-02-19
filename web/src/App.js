@@ -8,6 +8,9 @@ import VenueComparison from './VenueComparison';
 import VenueDetail from './VenueDetail';
 
 export default function App({ onLogout }) {
+    useEffect(() => {
+      loadVenues();
+    }, []);
   const [venues, setVenues] = useState([]);
   const [selectedVenues, setSelectedVenues] = useState(new Set());
   const [showForm, setShowForm] = useState(false);
@@ -19,15 +22,23 @@ export default function App({ onLogout }) {
   const [sortBy, setSortBy] = useState('date');
   const [isDraftVenue, setIsDraftVenue] = useState(false);
 
-  useEffect(() => {
-    loadVenues();
-  }, []);
+
+  const handleCancelForm = async () => {
+    if (isDraftVenue && editingVenue?.id) {
+      try {
+        await apiClient.deleteVenue(editingVenue.id);
+        await loadVenues();
+      } catch (error) {
+        console.error('Error deleting draft venue:', error);
+      }
+    }
+    setShowForm(false);
+    setEditingVenue(null);
+    setIsDraftVenue(false);
+  };
 
   const getFilteredSortedVenues = () => {
-    let filtered = venues.filter(v => 
-      v.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
+    let filtered = venues.filter(v => v.name?.toLowerCase().includes(searchTerm.toLowerCase()));
     filtered.sort((a, b) => {
       if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
       if (sortBy === 'date') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
@@ -38,22 +49,19 @@ export default function App({ onLogout }) {
       }
       return 0;
     });
-
     return filtered;
   };
 
-  const calculateTotal = (venue) => {
-    return (
-      (venue.venue_rental_cost || 0) +
-      ((venue.catering_per_person || 0) * (venue.guest_count || 0)) +
-      (venue.catering_flat_fee || 0) +
-      ((venue.bar_service_rate || 0) * (venue.guest_count || 0)) +
-      (venue.bar_flat_fee || 0) +
-      (venue.coordinator_fee || 0) +
-      (venue.event_insurance || 0) +
-      (venue.other_costs || 0)
-    );
-  };
+  const calculateTotal = (venue) => (
+    (venue.venue_rental_cost || 0) +
+    ((venue.catering_per_person || 0) * (venue.guest_count || 0)) +
+    (venue.catering_flat_fee || 0) +
+    ((venue.bar_service_rate || 0) * (venue.guest_count || 0)) +
+    (venue.bar_flat_fee || 0) +
+    (venue.coordinator_fee || 0) +
+    (venue.event_insurance || 0) +
+    (venue.other_costs || 0)
+  );
 
   const loadVenues = async () => {
     try {
@@ -88,46 +96,49 @@ export default function App({ onLogout }) {
     }
   };
 
+
+
+  // Place the JSX block after all function definitions
+  if (showForm) {
+    return (
+      <VenueForm
+        venue={editingVenue}
+        onSave={(data) => {
+          handleSaveVenue(data);
+        }}
+        onCancel={handleCancelForm}
+      />
+    );
+  }
+
   const handleAddVenue = async () => {
+    const draftVenue = {
+      name: '',
+      guest_count: 100,
+      event_duration_hours: 12,
+      venue_rental_cost: 0,
+      catering_per_person: 0,
+      catering_flat_fee: 0,
+      bar_service_rate: 0,
+      bar_flat_fee: 0,
+      coordinator_fee: 0,
+      event_insurance: 0,
+      other_costs: 0,
+      notes: '',
+      photos: []
+    };
     try {
-      // Create a draft venue immediately so photos can be uploaded
-      const draftVenue = {
-        name: '',
-        guest_count: 100,
-        event_duration_hours: 12,
-        venue_rental_cost: 0,
-        catering_per_person: 0,
-        catering_flat_fee: 0,
-        bar_service_rate: 0,
-        bar_flat_fee: 0,
-        coordinator_fee: 0,
-        event_insurance: 0,
-        other_costs: 0,
-        notes: ''
-      };
       const response = await apiClient.createVenue(draftVenue);
+      if (!response || !response.data || !response.data.id) {
+        throw new Error('No response from backend');
+      }
       setEditingVenue(response.data);
       setIsDraftVenue(true);
       setShowForm(true);
     } catch (error) {
       console.error('Error creating draft venue:', error);
-      alert('Failed to create venue');
+      alert('Failed to create venue. Please check your connection and try again.');
     }
-  };
-
-  const handleCancelForm = async () => {
-    if (isDraftVenue && editingVenue?.id) {
-      // Delete the draft venue if user cancels without saving
-      try {
-        await apiClient.deleteVenue(editingVenue.id);
-        await loadVenues();
-      } catch (error) {
-        console.error('Error deleting draft venue:', error);
-      }
-    }
-    setShowForm(false);
-    setEditingVenue(null);
-    setIsDraftVenue(false);
   };
 
   const handleDeleteVenue = async (venueId) => {

@@ -47,12 +47,15 @@ export default function VenueDetail({ venue, onClose }) {
 
   return (
     <div className="modal" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 540, minWidth: 0, width: '98vw', margin: '40px auto' }}>
         <button onClick={onClose}>Close</button>
         <div id="detailContent">
           <h2>{venue.name}</h2>
-          <div className="meta">{venue.guest_count || 0} guests • {venue.event_duration_hours || 0} hrs</div>
-          
+          <div className="meta" style={{ fontSize: '0.95em', color: '#888', fontWeight: 500, marginBottom: 8 }}>
+            {venue.guest_count || 0} guests &bull; {venue.event_duration_hours || 0} hrs
+          </div>
+
+          <div style={{ fontWeight: 600, fontSize: '1.1em', margin: '18px 0 8px 0' }}>Cost Breakdown</div>
           <div className="costs">
             <div className="cost-row">
               <div>Venue Rental</div>
@@ -63,7 +66,7 @@ export default function VenueDetail({ venue, onClose }) {
               <div>{formatMoney(catering)}</div>
             </div>
             <div className="cost-row">
-              <div>Bar</div>
+              <div>Bar Service</div>
               <div>{formatMoney(bar)}</div>
             </div>
             <div className="cost-row">
@@ -71,15 +74,26 @@ export default function VenueDetail({ venue, onClose }) {
               <div>{formatMoney(venue.coordinator_fee)}</div>
             </div>
             <div className="cost-row">
-              <div>Event Insurance</div>
+              <div>Insurance</div>
               <div>{formatMoney(venue.event_insurance)}</div>
             </div>
+            <div className="cost-row">
+              <div>Other Costs</div>
+              <div>{formatMoney(venue.other_costs)}</div>
+            </div>
+            <hr style={{ border: 0, borderTop: '1px solid #e0e0e0', margin: '12px 0 8px 0' }} />
             <div className="cost-row">
               <div><strong>Total</strong></div>
               <div><strong>{formatMoney(total)}</strong></div>
             </div>
           </div>
 
+          {/* Photos (#) section, always shown */}
+          <div style={{ margin: '20px 0 8px 0', fontWeight: 600, fontSize: '1.1em' }}>
+            Photos ({photos.length})
+          </div>
+
+          {/* Photo grid */}
           {photos.length > 0 && (
             <div className="gallery">
               {photos.map((photo, index) => (

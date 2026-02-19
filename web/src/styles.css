@@ -13,7 +13,7 @@ textarea{resize:none}
 button{padding:8px 10px;border:0;background:#2b7cff;color:white;border-radius:6px;cursor:pointer}
 button.secondary{background:#e0e6ef;color:#222}
 main{padding:18px}
-.venues{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.venues{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .card{background:white;border-radius:8px;padding:12px;border:1px solid #e6ecf8;display:flex;flex-direction:column}
 .card img{width:100%;height:140px;object-fit:cover;border-radius:6px}
 .card h3{margin:8px 0 0 0}

@@ -3,10 +3,14 @@ import VenuePhoto from './VenuePhoto';
 import { calculateBestWorst, getHighlightClass } from './highlightUtils';
 
 export default function VenueList({ venues, selectedVenues, onSelectVenue, onViewVenue, onEditVenue, loading }) {
+
   if (loading) return <div className="loading">Loading venues...</div>;
 
+  // Filter out draft venues (empty or whitespace-only name)
+  const filteredVenues = venues.filter(v => v.name && v.name.trim() !== '');
+
   // Calculate totals for each venue
-  const mapped = venues.map(v => {
+  const mapped = filteredVenues.map(v => {
     const guests = Number(v.guest_count || 0);
     const catering = (Number(v.catering_per_person || 0) * guests) + Number(v.catering_flat_fee || 0);
     const bar = (Number(v.bar_service_rate || 0) * guests) + Number(v.bar_flat_fee || 0);
@@ -33,7 +37,10 @@ export default function VenueList({ venues, selectedVenues, onSelectVenue, onVie
         >
           <VenuePhoto venue={v} />
           <h3>{v.name || 'Untitled'}</h3>
-          <div className="meta">{v.guest_count || 0} guests • {v.event_duration_hours || 0} hrs</div>
+          <div className="meta">
+            {v.guest_count || 0} guests • {v.event_duration_hours || 0} hrs
+            {v.photo_count > 0 && <span> • {v.photo_count} {v.photo_count === 1 ? 'photo' : 'photos'}</span>}
+          </div>
           
           <div className="costs">
             <div className={`cost-row ${getHighlightClass(v.venue_rental_cost, stats['venue_rental_cost'])}`}>
