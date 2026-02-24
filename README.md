@@ -24,8 +24,7 @@ A multi-platform wedding venue comparison app with **100% data parity** across w
 *Web demo video coming soon*
 
 ### iOS App
-<!-- Drag and drop a screen recording here via the GitHub README editor -->
-*iOS demo video coming soon*
+https://github.com/user-attachments/assets/5518e5eb-8e27-42e8-bc78-e6801b230137
 
 ---
 
