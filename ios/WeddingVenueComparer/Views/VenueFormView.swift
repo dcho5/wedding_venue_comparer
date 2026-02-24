@@ -41,8 +41,7 @@ struct VenueFormView: View {
                         Button(action: {
                             localVenue.guest_count = max(0, localVenue.guest_count - 1)
                         }) {
-                            Image(systemName: "minus.circle")
-                                .font(.title2)
+                            Image(systemName: "minus.circle").font(.title2)
                         }
                         .buttonStyle(.plain)
                         Text("\(localVenue.guest_count)")
@@ -52,15 +51,13 @@ struct VenueFormView: View {
                                 get: { Double(localVenue.guest_count) },
                                 set: { localVenue.guest_count = Int(($0 / 5).rounded()) * 5 }
                             ),
-                            in: 0...250,
-                            step: 5
+                            in: 0...250, step: 5
                         )
                         .frame(maxWidth: 180)
                         Button(action: {
                             localVenue.guest_count = min(250, localVenue.guest_count + 1)
                         }) {
-                            Image(systemName: "plus.circle")
-                                .font(.title2)
+                            Image(systemName: "plus.circle").font(.title2)
                         }
                         .buttonStyle(.plain)
                     }
@@ -72,8 +69,7 @@ struct VenueFormView: View {
                             let newValue = localVenue.event_duration_hours - 0.5
                             localVenue.event_duration_hours = max(0, (newValue * 2).rounded() / 2)
                         }) {
-                            Image(systemName: "minus.circle")
-                                .font(.title2)
+                            Image(systemName: "minus.circle").font(.title2)
                         }
                         .buttonStyle(.plain)
                         Text(localVenue.event_duration_hours.truncatingRemainder(dividingBy: 1) == 0
@@ -85,16 +81,14 @@ struct VenueFormView: View {
                                 get: { localVenue.event_duration_hours.rounded() },
                                 set: { localVenue.event_duration_hours = $0.rounded() }
                             ),
-                            in: 0...24,
-                            step: 1
+                            in: 0...24, step: 1
                         )
                         .frame(maxWidth: 180)
                         Button(action: {
                             let newValue = localVenue.event_duration_hours + 0.5
                             localVenue.event_duration_hours = min(24, (newValue * 2).rounded() / 2)
                         }) {
-                            Image(systemName: "plus.circle")
-                                .font(.title2)
+                            Image(systemName: "plus.circle").font(.title2)
                         }
                         .buttonStyle(.plain)
                     }
@@ -108,8 +102,7 @@ struct VenueFormView: View {
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 AsyncImage(url: URL(string: titleURL)) { image in
-                                    image
-                                        .resizable()
+                                    image.resizable()
                                         .aspectRatio(contentMode: .fill)
                                         .frame(maxWidth: .infinity)
                                         .frame(height: 200)
@@ -134,8 +127,7 @@ struct VenueFormView: View {
                                     ForEach(existingPhotos) { photo in
                                         let isSelected = titlePhotoId == photo.id
                                         AsyncImage(url: URL(string: photo.url)) { image in
-                                            image
-                                                .resizable()
+                                            image.resizable()
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 80, height: 80)
                                                 .clipped()
@@ -152,7 +144,6 @@ struct VenueFormView: View {
                                                             .offset(x: 6, y: -6)
                                                     }
                                                 }
-                                                // ← add this
                                                 .overlay(alignment: .topLeading) {
                                                     Button {
                                                         Task { deletePhoto(photo) }
@@ -199,29 +190,23 @@ struct VenueFormView: View {
                 Section(header: Text("Venue Costs")) {
                     CostInput(label: "Venue Rental", value: $localVenue.venue_rental_cost)
                 }
-
                 Section(header: Text("Catering Costs")) {
                     CostInput(label: "Per Person", value: $localVenue.catering_per_person)
-                    CostInput(label: "Flat Fee", value: $localVenue.catering_flat_fee)
+                    CostInput(label: "Flat Fee",   value: $localVenue.catering_flat_fee)
                 }
-
                 Section(header: Text("Bar Costs")) {
                     CostInput(label: "Per Person", value: $localVenue.bar_service_rate)
-                    CostInput(label: "Flat Fee", value: $localVenue.bar_flat_fee)
+                    CostInput(label: "Flat Fee",   value: $localVenue.bar_flat_fee)
                 }
-
                 Section(header: Text("Coordinator Fee")) {
                     CostInput(label: "Amount", value: $localVenue.coordinator_fee)
                 }
-
                 Section(header: Text("Event Insurance")) {
                     CostInput(label: "Amount", value: $localVenue.event_insurance)
                 }
-
                 Section(header: Text("Other Costs")) {
                     CostInput(label: "Amount", value: $localVenue.other_costs)
                 }
-
                 Section(header: Text("Notes")) {
                     TextEditor(text: $localVenue.notes)
                         .frame(height: 100)
@@ -229,9 +214,7 @@ struct VenueFormView: View {
 
                 if let error = errorMessage {
                     Section {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(.caption)
+                        Text(error).foregroundColor(.red).font(.caption)
                     }
                 }
             }
@@ -246,10 +229,9 @@ struct VenueFormView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 HStack {
-                    Text("Total Cost")
-                        .fontWeight(.bold)
+                    Text("Total Cost").fontWeight(.bold)
                     Spacer()
-                    Text("$\(String(format: "%.2f", localVenue.totalCost))")
+                    Text(VenueUtils.formatMoney(localVenue.totalCost))
                         .fontWeight(.bold)
                         .foregroundColor(.green)
                 }
@@ -264,15 +246,11 @@ struct VenueFormView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
-                    saveVenue()
-                }
-                .disabled(localVenue.name.isEmpty || isLoading || isUploadingPhotos)
+                Button("Save") { saveVenue() }
+                    .disabled(localVenue.name.isEmpty || isLoading || isUploadingPhotos)
             }
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
-                    cancelAndCleanup()
-                }
+                Button("Cancel") { cancelAndCleanup() }
             }
         }
         .onAppear {
@@ -284,6 +262,8 @@ struct VenueFormView: View {
             }
         }
     }
+
+    // MARK: - Private Methods
 
     private func createPlaceholderVenue() async {
         let placeholder = Venue()
@@ -304,9 +284,7 @@ struct VenueFormView: View {
             let fileName = "\(Int(Date().timeIntervalSince1970 * 1000))-\(idx).jpg"
             let result = await firebaseService.uploadPhoto(venueId: venueId, imageData: imageData, fileName: fileName)
             if case .success(let photo) = result {
-                await MainActor.run {
-                    existingPhotos.append(photo)
-                }
+                await MainActor.run { existingPhotos.append(photo) }
             }
         }
         await MainActor.run { isUploadingPhotos = false }
@@ -330,7 +308,7 @@ struct VenueFormView: View {
             }
         }
     }
-    
+
     private func deletePhoto(_ photo: VenuePhoto) {
         existingPhotos.removeAll { $0.id == photo.id }
         pendingDeletions.append(photo)
@@ -339,12 +317,10 @@ struct VenueFormView: View {
             localVenue.title_photo = existingPhotos.first?.url
         }
     }
-    
+
     private func cancelAndCleanup() {
         if isNewVenue, let venueId = createdVenueId {
-            Task {
-                _ = await firebaseService.deleteVenue(venueId)
-            }
+            Task { _ = await firebaseService.deleteVenue(venueId) }
         }
         isPresented = false
     }
@@ -352,13 +328,10 @@ struct VenueFormView: View {
     private func saveVenue() {
         isLoading = true
         errorMessage = nil
-
         Task {
-            // Execute pending deletions
             for photo in pendingDeletions {
                 _ = await firebaseService.deletePhoto(venueId: localVenue.id ?? "", photo: photo)
             }
-
             let result = await firebaseService.updateVenue(localVenue)
             await MainActor.run {
                 isLoading = false
@@ -372,6 +345,8 @@ struct VenueFormView: View {
             }
         }
     }
+
+    // MARK: - ImagePicker
 
     struct ImagePicker: UIViewControllerRepresentable {
         @Binding var images: [UIImage]
@@ -387,26 +362,18 @@ struct VenueFormView: View {
         }
 
         func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
-
-        func makeCoordinator() -> Coordinator {
-            Coordinator(self)
-        }
+        func makeCoordinator() -> Coordinator { Coordinator(self) }
 
         class Coordinator: NSObject, PHPickerViewControllerDelegate {
             let parent: ImagePicker
-
-            init(_ parent: ImagePicker) {
-                self.parent = parent
-            }
+            init(_ parent: ImagePicker) { self.parent = parent }
 
             func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
                 parent.dismiss()
                 for result in results {
                     result.itemProvider.loadObject(ofClass: UIImage.self) { object, _ in
                         if let image = object as? UIImage {
-                            DispatchQueue.main.async {
-                                self.parent.images.append(image)
-                            }
+                            DispatchQueue.main.async { self.parent.images.append(image) }
                         }
                     }
                 }
@@ -414,6 +381,8 @@ struct VenueFormView: View {
         }
     }
 }
+
+// MARK: - CostInput
 
 struct CostInput: View {
     let label: String
@@ -444,14 +413,8 @@ struct CostInput: View {
                     } else {
                         result = filtered
                     }
-                    if result != newValue {
-                        self.text = result
-                    }
-                    if let doubleValue = Double(result) {
-                        value = (doubleValue * 100).rounded() / 100
-                    } else {
-                        value = 0
-                    }
+                    if result != newValue { self.text = result }
+                    value = Double(result) != nil ? (Double(result)! * 100).rounded() / 100 : 0
                 }
         }
     }

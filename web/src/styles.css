@@ -381,4 +381,264 @@ main{padding:18px}
   }
 }
 
+/* ============================================================
+   DARK MODE
+   Responds automatically to OS/browser preference.
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
 
+  /* ── Base ── */
+  body {
+    background-color: #0f0f0f;
+    color: #e8e8e8;
+  }
+
+  /* ── Header ── */
+  header {
+    background: #1c1c1e;
+    border-bottom-color: #2c2c2e;
+  }
+
+  /* ── Inputs / selects / textareas ── */
+  input[type=text],
+  input[type=number],
+  select,
+  textarea {
+    background: #2c2c2e;
+    color: #e8e8e8;
+    border-color: #3a3a3c;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #636366;
+  }
+
+  /* Name field emphasis override */
+  .left .full input {
+    border-color: #3a5a9a;
+    background: #2c2c2e;
+    color: #e8e8e8;
+  }
+
+  /* ── Buttons ── */
+  button {
+    background: #2b7cff;
+    color: #fff;
+  }
+
+  button.secondary {
+    background: #2c2c2e;
+    color: #e8e8e8;
+    border: 1px solid #3a3a3c;
+  }
+
+  button:disabled {
+    opacity: 0.4;
+  }
+
+  .slider-btn {
+    background: #3a3a3c;
+    color: #e8e8e8;
+  }
+
+  .slider-btn:hover {
+    background: #48484a;
+  }
+
+  .slider-wrap span {
+    background: #2c2c2e;
+    color: #e8e8e8;
+  }
+
+  /* Bar toggle */
+  .bar-toggle button {
+    background: #2c2c2e;
+    color: #e8e8e8;
+    border-color: #3a3a3c;
+  }
+
+  .bar-toggle button.active {
+    background: #2b7cff;
+    color: #fff;
+    border-color: #2b7cff;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: #1c1c1e;
+    border-color: #2c2c2e;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .card .meta,
+  .meta {
+    color: #8e8e93;
+  }
+
+  /* ── Cost highlights ── */
+  .highlight-low  { background: rgba(16,185,129,0.13); border-left-color: #10b981; }
+  .highlight-high { background: rgba(239,68,68,0.11);  border-left-color: #ef4444; }
+  .highlight-neutral { background: rgba(158,158,158,0.10); border-left-color: #636366; }
+
+  /* ── Modals ── */
+  .modal {
+    background: rgba(0,0,0,0.65);
+  }
+
+  .modal-content {
+    background: #1c1c1e;
+    border: 1px solid #2c2c2e;
+  }
+
+  /* ── Cost cards (form) ── */
+  .cost-card {
+    background: #1c1c1e;
+    border-color: #2c2c2e;
+  }
+
+  .card-header {
+    color: #e8e8e8;
+  }
+
+  .cost-input {
+    background: #2c2c2e;
+    color: #e8e8e8;
+    border-color: #3a3a3c;
+  }
+
+  .input-label,
+  .muted {
+    color: #8e8e93;
+  }
+
+  /* ── Summary panel ── */
+  .summary-panel {
+    background: #1c1c1e;
+    border-color: #2c2c2e;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .summary-panel .total {
+    color: #60a5fa;
+  }
+
+  .summary-panel.updated .total {
+    color: #34d399;
+  }
+
+  /* ── Drop zone ── */
+  .drop-zone {
+    background: #1c1c1e;
+    border-color: #3a3a3c;
+    color: #8e8e93;
+  }
+
+  .drop-zone:hover {
+    background: #2c2c2e;
+    border-color: #5585d4;
+  }
+
+  .drop-zone.dragover {
+    background: #1e2d4a;
+    border-color: #2b7cff;
+  }
+
+  /* ── Comparison grid ── */
+  .comparison-grid {
+    background: #2c2c2e;
+    border-color: #2c2c2e;
+  }
+
+  .comparison-cell {
+    background: #1c1c1e;
+    color: #e8e8e8;
+  }
+
+  .comparison-cell.header {
+    background: #2c2c2e;
+    color: #a1a1aa;
+  }
+
+  /* venue-header stays blue — no override needed */
+
+  .comparison-cell.best  { background: rgba(16,185,129,0.13); border-left-color: #10b981; }
+  .comparison-cell.worst { background: rgba(239,68,68,0.11);  border-left-color: #ef4444; }
+
+  /* ── Metric select (mobile comparison) ── */
+  .metric-select {
+    background: #2c2c2e;
+    color: #e8e8e8;
+    border-color: #3a3a3c;
+    border-radius: 4px;
+    padding: 8px 12px;
+  }
+
+  /* ── Misc ── */
+  hr,
+  .divider {
+    border-color: #2c2c2e;
+  }
+
+  .loading {
+    color: #8e8e93;
+  }
+}
+
+/* ============================================================
+   MOBILE COMPARISON CARDS
+   ============================================================ */
+.mobile-card {
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #e1e6f0;
+}
+
+.mobile-card-default  { background: #ffffff; border-color: #e1e6f0; }
+.mobile-card-best     { background: #e8f5e9; border-color: #4caf50; }
+.mobile-card-worst    { background: #ffebee; border-color: #ef4444; }
+.mobile-card-neutral  { background: #f5f5f5; border-color: #bdbdbd; }
+
+.mobile-card-photo {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.mobile-card-body { flex: 1; }
+
+.mobile-card-name {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+}
+
+.mobile-card-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.mobile-card-default  .mobile-card-value { color: #333; }
+.mobile-card-best     .mobile-card-value { color: #2e7d32; }
+.mobile-card-worst    .mobile-card-value { color: #c62828; }
+.mobile-card-neutral  .mobile-card-value { color: #757575; }
+
+@media (prefers-color-scheme: dark) {
+  .mobile-card-default  { background: #1c1c1e; border-color: #2c2c2e; }
+  .mobile-card-best     { background: rgba(16,185,129,0.13); border-color: #10b981; }
+  .mobile-card-worst    { background: rgba(239,68,68,0.11);  border-color: #ef4444; }
+  .mobile-card-neutral  { background: #2c2c2e; border-color: #48484a; }
+
+  .mobile-card-default  .mobile-card-value { color: #e8e8e8; }
+  .mobile-card-best     .mobile-card-value { color: #34d399; }
+  .mobile-card-worst    .mobile-card-value { color: #f87171; }
+  .mobile-card-neutral  .mobile-card-value { color: #8e8e93; }
+}

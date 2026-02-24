@@ -14,9 +14,9 @@ struct VenueDetailView: View {
     @State private var showingEdit = false
     @State private var showingDeleteConfirm = false
     @Environment(\.dismiss) var dismiss
-    
+
     private static var photoCache: [String: [VenuePhoto]] = [:]
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -31,19 +31,12 @@ struct VenueDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Close") {
-                    dismiss()
-                }
+                Button("Close") { dismiss() }
             }
-            
             ToolbarItem(placement: .primaryAction) {
                 Menu {
-                    Button("Edit") {
-                        showingEdit = true
-                    }
-                    Button("Delete", role: .destructive) {
-                        showingDeleteConfirm = true
-                    }
+                    Button("Edit") { showingEdit = true }
+                    Button("Delete", role: .destructive) { showingDeleteConfirm = true }
                 } label: {
                     Image(systemName: "ellipsis")
                 }
@@ -56,16 +49,14 @@ struct VenueDetailView: View {
                 onDismiss: { showingLightbox = false }
             )
         }
-        .task {
-            await loadPhotos()
-        }.alert("Delete Venue?", isPresented: $showingDeleteConfirm) {
+        .task { await loadPhotos() }
+        .alert("Delete Venue?", isPresented: $showingDeleteConfirm) {
             Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
-                deleteVenue()
-            }
+            Button("Delete", role: .destructive) { deleteVenue() }
         } message: {
             Text("This will permanently delete \"\(currentVenue.name)\" and all its photos.")
-        }.sheet(isPresented: $showingEdit) {
+        }
+        .sheet(isPresented: $showingEdit) {
             NavigationStack {
                 VenueFormView(isPresented: $showingEdit, existingVenue: venue)
                     .environmentObject(firebaseService)
@@ -80,24 +71,27 @@ struct VenueDetailView: View {
             }
         }
     }
-    
+
     private var currentVenue: Venue {
         firebaseService.venues.first(where: { $0.id == venue.id }) ?? venue
     }
-    
+
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(currentVenue.name)
                 .font(.title)
                 .fontWeight(.bold)
-            
+
             HStack {
                 Label("\(currentVenue.guest_count) guests", systemImage: "person.2")
-                Label("\(currentVenue.event_duration_hours.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(currentVenue.event_duration_hours)) : String(format: "%g", currentVenue.event_duration_hours))h duration", systemImage: "clock")
+                Label(
+                    "\(currentVenue.event_duration_hours.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(currentVenue.event_duration_hours)) : String(format: "%g", currentVenue.event_duration_hours))h duration",
+                    systemImage: "clock"
+                )
             }
             .font(.caption)
             .foregroundColor(.gray)
-            
+
             if !currentVenue.notes.isEmpty {
                 Text(currentVenue.notes)
                     .font(.caption)
@@ -105,48 +99,46 @@ struct VenueDetailView: View {
             }
         }
     }
-    
+
     private var costBreakdownSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Cost Breakdown")
                 .font(.headline)
-            
-            CostRow(label: "Venue Rental", amount: currentVenue.venue_rental_cost)
-            CostRow(label: "Catering", amount: currentVenue.totalCatering)
-            CostRow(label: "Bar Service", amount: currentVenue.totalBar)
-            CostRow(label: "Coordinator", amount: currentVenue.coordinator_fee)
-            CostRow(label: "Insurance", amount: currentVenue.event_insurance)
-            CostRow(label: "Other Costs", amount: currentVenue.other_costs)
-            
+
+            CostRow(label: "Venue Rental",  amount: currentVenue.venue_rental_cost)
+            CostRow(label: "Catering",      amount: currentVenue.totalCatering)
+            CostRow(label: "Bar Service",   amount: currentVenue.totalBar)
+            CostRow(label: "Coordinator",   amount: currentVenue.coordinator_fee)
+            CostRow(label: "Insurance",     amount: currentVenue.event_insurance)
+            CostRow(label: "Other Costs",   amount: currentVenue.other_costs)
+
             Divider()
-            
+
             HStack {
-                Text("Total Cost")
-                    .font(.headline)
+                Text("Total Cost").font(.headline)
                 Spacer()
-                Text(String(format: "$%.2f", currentVenue.totalCost))
+                Text(VenueUtils.formatMoney(currentVenue.totalCost))
                     .font(.headline)
                     .foregroundColor(.blue)
             }
-            
+
             HStack {
-                Text("Per Guest")
-                    .font(.subheadline)
+                Text("Per Guest").font(.subheadline)
                 Spacer()
-                Text(String(format: "$%.2f", currentVenue.perGuestCost))
+                Text(VenueUtils.formatMoney(currentVenue.perGuestCost))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
         }
     }
-    
+
     private var photosSection: some View {
         Group {
             if !photos.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Photos (\(photos.count))")
                         .font(.headline)
-                    
+
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             ForEach(Array(photos.enumerated()), id: \.element.id) { index, photo in
@@ -155,9 +147,7 @@ struct VenueDetailView: View {
                                     showingLightbox = true
                                 } label: {
                                     AsyncImage(url: URL(string: photo.url)) { image in
-                                        image
-                                            .resizable()
-                                            .scaledToFill()
+                                        image.resizable().scaledToFill()
                                     } placeholder: {
                                         Color.gray.opacity(0.3)
                                     }
@@ -172,47 +162,36 @@ struct VenueDetailView: View {
             }
         }
     }
-    
+
     private func loadPhotos() async {
         guard let venueId = venue.id,
-              let uid = firebaseService.currentUser?.uid else {
+              let uid = firebaseService.currentUser?.uid else { return }
+
+        if let cached = Self.photoCache[venueId] {
+            await MainActor.run { self.photos = cached }
             return
         }
-        
-        // Check cache first
-        if let cachedPhotos = Self.photoCache[venueId] {
-            await MainActor.run {
-                self.photos = cachedPhotos
-            }
-            return
-        }
-        
+
         do {
             let snapshot = try await Firestore.firestore()
-                .collection("users")
-                .document(uid)
-                .collection("venues")
-                .document(venueId)
+                .collection("users").document(uid)
+                .collection("venues").document(venueId)
                 .collection("photos")
                 .order(by: "created_at", descending: false)
                 .getDocuments()
-            
-            let loadedPhotos = snapshot.documents.compactMap { doc -> VenuePhoto? in
-                try? doc.data(as: VenuePhoto.self)
-            }
-            
+
+            let loaded = snapshot.documents.compactMap { try? $0.data(as: VenuePhoto.self) }
             await MainActor.run {
-                self.photos = loadedPhotos
-                Self.photoCache[venueId] = loadedPhotos
+                self.photos = loaded
+                Self.photoCache[venueId] = loaded
             }
         } catch {
             print("Error loading photos: \(error)")
         }
     }
-    
+
     private func deleteVenue() {
         guard let venueId = venue.id else { return }
-        
         Task {
             let result = await firebaseService.deleteVenue(venueId)
             switch result {
@@ -226,26 +205,30 @@ struct VenueDetailView: View {
     }
 }
 
+// MARK: - CostRow
+
 struct CostRow: View {
     let label: String
     let amount: Double
-    
+
     var body: some View {
         HStack {
             Text(label)
             Spacer()
-            Text(String(format: "$%.2f", amount))
+            Text(VenueUtils.formatMoney(amount))
                 .foregroundColor(.secondary)
         }
         .font(.subheadline)
     }
 }
 
+// MARK: - PhotoLightbox
+
 struct PhotoLightbox: View {
     let photos: [VenuePhoto]
     @Binding var currentIndex: Int
     let onDismiss: () -> Void
-    
+
     @State private var dragOffset: CGSize = .zero
     @GestureState private var isDragging = false
 
@@ -254,9 +237,7 @@ struct PhotoLightbox: View {
             ZStack {
                 Color.black
                     .ignoresSafeArea()
-                    .onTapGesture {
-                        onDismiss()
-                    }
+                    .onTapGesture { onDismiss() }
 
                 VStack(spacing: 0) {
                     HStack {
@@ -281,8 +262,7 @@ struct PhotoLightbox: View {
                                         .frame(width: geometry.size.width, height: geometry.size.height)
                                         .clipped()
                                 } placeholder: {
-                                    ProgressView()
-                                        .tint(.white)
+                                    ProgressView().tint(.white)
                                 }
                                 .tag(index)
                             }
@@ -301,9 +281,7 @@ struct PhotoLightbox: View {
                                     if value.translation.height > 120 {
                                         onDismiss()
                                     } else {
-                                        withAnimation(.spring()) {
-                                            dragOffset = .zero
-                                        }
+                                        withAnimation(.spring()) { dragOffset = .zero }
                                     }
                                 }
                         )

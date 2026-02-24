@@ -80,3 +80,32 @@
 .hidden {
   display: none !important;
 }
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  .auth-card {
+    background: #1c1c1e;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    color: #e8e8e8;
+  }
+
+  .auth-card input {
+    background: #2c2c2e;
+    border-color: #3a3a3c;
+    color: #e8e8e8;
+  }
+
+  .auth-card input::placeholder {
+    color: #636366;
+  }
+
+  .auth-card p {
+    color: #8e8e93;
+  }
+
+  .link-btn {
+    color: #7b9fff;
+  }
+}

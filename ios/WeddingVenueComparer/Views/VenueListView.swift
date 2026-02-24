@@ -37,9 +37,9 @@ struct VenueListView: View {
         return searched.sorted { a, b in
             let result: Bool
             switch sortOption {
-            case .dateAdded:    result = (a.created_at?.dateValue() ?? .distantPast) < (b.created_at?.dateValue() ?? .distantPast)
-            case .name:         result = a.name.localizedCaseInsensitiveCompare(b.name) == .orderedAscending
-            case .totalCost:    result = a.totalCost < b.totalCost
+            case .dateAdded: result = (a.created_at?.dateValue() ?? .distantPast) < (b.created_at?.dateValue() ?? .distantPast)
+            case .name:      result = a.name.localizedCaseInsensitiveCompare(b.name) == .orderedAscending
+            case .totalCost: result = a.totalCost < b.totalCost
             }
             return sortAscending ? result : !result
         }
@@ -49,12 +49,12 @@ struct VenueListView: View {
         let venues = filteredVenues
         let metrics: [(String, (Venue) -> Double)] = [
             ("venue_rental_cost", { $0.venue_rental_cost }),
-            ("catering", { $0.totalCatering }),
-            ("bar", { $0.totalBar }),
-            ("coordinator_fee", { $0.coordinator_fee }),
-            ("event_insurance", { $0.event_insurance }),
-            ("other_costs", { $0.other_costs }),
-            ("total", { $0.totalCost })
+            ("catering",          { $0.totalCatering }),
+            ("bar",               { $0.totalBar }),
+            ("coordinator_fee",   { $0.coordinator_fee }),
+            ("event_insurance",   { $0.event_insurance }),
+            ("other_costs",       { $0.other_costs }),
+            ("total",             { $0.totalCost })
         ]
         var result: [String: (min: Double, max: Double)] = [:]
         for (key, valueFn) in metrics {
@@ -105,19 +105,15 @@ struct VenueListView: View {
         VStack(spacing: 12) {
             Image(systemName: "sparkles")
                 .font(.system(size: 48))
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
             if firebaseService.venues.isEmpty {
-                Text("No venues yet")
-                    .font(.headline)
+                Text("No venues yet").font(.headline)
                 Text("Add your first venue to get started")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                    .font(.caption).foregroundColor(.secondary)
             } else {
-                Text("No results")
-                    .font(.headline)
+                Text("No results").font(.headline)
                 Text("Try a different search term")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                    .font(.caption).foregroundColor(.secondary)
             }
         }
         .frame(maxHeight: .infinity, alignment: .center)
@@ -136,30 +132,24 @@ struct VenueListView: View {
                         .contentShape(Rectangle())
                         .opacity(atLimit ? 0.5 : 1.0)
                         .onTapGesture {
-                            if isComparing {
-                                toggleCompare(venue)
-                            } else {
-                                selectedVenue = venue
-                            }
+                            if isComparing { toggleCompare(venue) }
+                            else { selectedVenue = venue }
                         }
                         .onLongPressGesture {
                             if !isComparing {
-                                withAnimation(.easeInOut(duration: 0.15)) {
-                                    isComparing = true
-                                }
+                                withAnimation(.easeInOut(duration: 0.15)) { isComparing = true }
                             }
                             toggleCompare(venue)
                         }
                         .contextMenu {
                             Button {
                                 if !isComparing {
-                                    withAnimation(.easeInOut(duration: 0.15)) {
-                                        isComparing = true
-                                    }
+                                    withAnimation(.easeInOut(duration: 0.15)) { isComparing = true }
                                 }
                                 toggleCompare(venue)
                             } label: {
-                                Label(isSelected ? "Remove from Compare" : "Add to Compare", systemImage: "arrow.left.arrow.right")
+                                Label(isSelected ? "Remove from Compare" : "Add to Compare",
+                                      systemImage: "arrow.left.arrow.right")
                             }
                             .disabled(atLimit)
 
@@ -181,10 +171,8 @@ struct VenueListView: View {
     @ViewBuilder
     private var trailingToolbarItems: some View {
         if isComparing {
-            Button("Compare") {
-                showingComparison = true
-            }
-            .disabled(compareIDs.count < 2)
+            Button("Compare") { showingComparison = true }
+                .disabled(compareIDs.count < 2)
         } else {
             Button(action: { showingAddVenue = true }) {
                 Image(systemName: "plus")
@@ -195,21 +183,15 @@ struct VenueListView: View {
     @ViewBuilder
     private var leadingToolbarItems: some View {
         if isComparing {
-            Button("Done") {
-                exitCompareMode()
-            }
+            Button("Done") { exitCompareMode() }
         } else {
             Menu {
                 Menu {
                     Section("Sort By") {
                         ForEach(VenueSortOption.allCases, id: \.self) { option in
                             Button {
-                                if sortOption == option {
-                                    sortAscending.toggle()
-                                } else {
-                                    sortOption = option
-                                    sortAscending = true
-                                }
+                                if sortOption == option { sortAscending.toggle() }
+                                else { sortOption = option; sortAscending = true }
                             } label: {
                                 HStack {
                                     Text(option.rawValue)
@@ -240,53 +222,34 @@ struct VenueListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if filteredVenues.isEmpty {
-                    emptyStateView
-                } else {
-                    venueGrid
-                }
+                if filteredVenues.isEmpty { emptyStateView }
+                else { venueGrid }
             }
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, placement: .toolbar)
-            .refreshable {
-                firebaseService.loadVenues()
-            }
+            .refreshable { firebaseService.loadVenues() }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     if isComparing {
                         VStack(spacing: 1) {
                             ViewThatFits(in: .horizontal) {
-                                Text("Select Venues")
-                                    .font(.headline)
-                                Text("Select")
-                                    .font(.headline)
+                                Text("Select Venues").font(.headline)
+                                Text("Select").font(.headline)
                             }
                             ViewThatFits(in: .horizontal) {
-                                Text("Choose 2–3 to compare")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Text("Select 2–3")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                Text("Choose 2–3 to compare").font(.caption).foregroundColor(.secondary)
+                                Text("Select 2–3").font(.caption).foregroundColor(.secondary)
                             }
                         }
                     } else {
                         ViewThatFits(in: .horizontal) {
-                            Text("Wedding Venue Comparer")
-                                .font(.headline)
-                            Text("💍 Venues")
-                                .font(.headline)
+                            Text("Wedding Venue Comparer").font(.headline)
+                            Text("💍 Venues").font(.headline)
                         }
                     }
                 }
-
-                ToolbarItem(placement: .topBarTrailing) {
-                    trailingToolbarItems
-                }
-
-                ToolbarItem(placement: .topBarLeading) {
-                    leadingToolbarItems
-                }
+                ToolbarItem(placement: .topBarTrailing) { trailingToolbarItems }
+                ToolbarItem(placement: .topBarLeading)  { leadingToolbarItems  }
             }
             .sheet(isPresented: $showingAddVenue) {
                 NavigationStack {
@@ -306,9 +269,7 @@ struct VenueListView: View {
             }
             .alert("Sign out?", isPresented: $showingSignOutConfirm) {
                 Button("Cancel", role: .cancel) {}
-                Button("Sign Out", role: .destructive) {
-                    _ = firebaseService.signOut()
-                }
+                Button("Sign Out", role: .destructive) { _ = firebaseService.signOut() }
             } message: {
                 Text("You'll need to sign in again to access your venues.")
             }
@@ -325,9 +286,9 @@ struct VenueListView: View {
                 Text("This will permanently delete \"\(venueToDelete?.name ?? "")\" and all its photos.")
             }
             .onAppear { updateStatsCache() }
-            .onChange(of: searchText) { updateStatsCache() }
+            .onChange(of: searchText)              { updateStatsCache() }
             .onChange(of: firebaseService.venues.count) { updateStatsCache() }
-            .onChange(of: firebaseService.venues) { updateStatsCache() }
+            .onChange(of: firebaseService.venues)  { updateStatsCache() }
         }
     }
 }
@@ -339,22 +300,20 @@ struct VenueCard: View {
     let stats: [String: (min: Double, max: Double)]
     var isSelected: Bool = false
 
-    private var cardShadow: Color { Color.black.opacity(0.08) }
-    private var highlightNeutral: Color { Color.gray.opacity(0.12) }
-    private var highlightLow: Color { Color(red: 0.06, green: 0.73, blue: 0.51).opacity(0.14) }
-    private var highlightHigh: Color { Color(red: 0.94, green: 0.27, blue: 0.27).opacity(0.10) }
+    private var cardBackground: Color  { Color(.secondarySystemGroupedBackground) }
+    private var cardShadow: Color      { Color.black.opacity(0.10) }
+    private var cardBorder: Color      { Color(.separator).opacity(0.5) }
+    private var highlightNeutral: Color { Color(.systemGray5) }
+    private var highlightLow: Color    { Color(red: 0.06, green: 0.73, blue: 0.51).opacity(0.18) }
+    private var highlightHigh: Color   { Color(red: 0.94, green: 0.27, blue: 0.27).opacity(0.14) }
 
     private func highlight(for value: Double, key: String) -> (color: Color, border: Color) {
         guard let stat = stats[key] else { return (.clear, .clear) }
         if stat.min == 0 && stat.max == 0 { return (.clear, .clear) }
-        if stat.min == stat.max { return (highlightNeutral, Color.gray.opacity(0.35)) }
-        if value == stat.min { return (highlightLow, Color(red: 0.06, green: 0.73, blue: 0.51)) }
+        if stat.min == stat.max { return (highlightNeutral, Color(.systemGray3)) }
+        if value == stat.min { return (highlightLow,  Color(red: 0.06, green: 0.73, blue: 0.51)) }
         if value == stat.max { return (highlightHigh, Color(red: 0.94, green: 0.27, blue: 0.27)) }
         return (.clear, .clear)
-    }
-
-    private func formatMoney(_ value: Double) -> String {
-        String(format: "$%.2f", value)
     }
 
     var body: some View {
@@ -373,32 +332,37 @@ struct VenueCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(venue.name.isEmpty ? "Untitled" : venue.name)
                     .font(.headline)
-                Text("\(venue.guest_count) guests • " + (venue.event_duration_hours.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(venue.event_duration_hours)) : String(format: "%.1f", venue.event_duration_hours)) + " hrs")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                Text(
+                    "\(venue.guest_count) guests • " +
+                    (venue.event_duration_hours.truncatingRemainder(dividingBy: 1) == 0
+                        ? String(Int(venue.event_duration_hours))
+                        : String(format: "%.1f", venue.event_duration_hours)) +
+                    " hrs"
+                )
+                .font(.caption)
+                .foregroundColor(.secondary)
             }
 
             VStack(spacing: 6) {
-                VenueCostRow(label: "Rental", value: formatMoney(venue.venue_rental_cost), highlight: highlight(for: venue.venue_rental_cost, key: "venue_rental_cost"))
-                VenueCostRow(label: "Catering", value: formatMoney(venue.totalCatering), highlight: highlight(for: venue.totalCatering, key: "catering"))
-                VenueCostRow(label: "Bar", value: formatMoney(venue.totalBar), highlight: highlight(for: venue.totalBar, key: "bar"))
-                VenueCostRow(label: "Coordinator", value: formatMoney(venue.coordinator_fee), highlight: highlight(for: venue.coordinator_fee, key: "coordinator_fee"))
-                VenueCostRow(label: "Event Insurance", value: formatMoney(venue.event_insurance), highlight: highlight(for: venue.event_insurance, key: "event_insurance"))
-                VenueCostRow(label: "Other", value: formatMoney(venue.other_costs), highlight: highlight(for: venue.other_costs, key: "other_costs"))
-                VenueCostRow(label: "Total", value: formatMoney(venue.totalCost), highlight: highlight(for: venue.totalCost, key: "total"), isEmphasized: true)
+                VenueCostRow(label: "Rental",         value: VenueUtils.formatMoney(venue.venue_rental_cost), highlight: highlight(for: venue.venue_rental_cost, key: "venue_rental_cost"))
+                VenueCostRow(label: "Catering",       value: VenueUtils.formatMoney(venue.totalCatering),     highlight: highlight(for: venue.totalCatering,     key: "catering"))
+                VenueCostRow(label: "Bar",            value: VenueUtils.formatMoney(venue.totalBar),          highlight: highlight(for: venue.totalBar,          key: "bar"))
+                VenueCostRow(label: "Coordinator",    value: VenueUtils.formatMoney(venue.coordinator_fee),   highlight: highlight(for: venue.coordinator_fee,   key: "coordinator_fee"))
+                VenueCostRow(label: "Event Insurance",value: VenueUtils.formatMoney(venue.event_insurance),   highlight: highlight(for: venue.event_insurance,   key: "event_insurance"))
+                VenueCostRow(label: "Other",          value: VenueUtils.formatMoney(venue.other_costs),       highlight: highlight(for: venue.other_costs,       key: "other_costs"))
+                VenueCostRow(label: "Total",          value: VenueUtils.formatMoney(venue.totalCost),         highlight: highlight(for: venue.totalCost,         key: "total"), isEmphasized: true)
             }
 
-            Text("Per guest: \(formatMoney(venue.perGuestCost))")
+            Text("Per guest: \(VenueUtils.formatMoney(venue.perGuestCost))")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
         .padding(12)
-        .background(Color.white)
+        .background(cardBackground)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color.blue : Color(red: 0.90, green: 0.93, blue: 0.97),
-                        lineWidth: isSelected ? 2 : 1)
+                .stroke(isSelected ? Color.blue : cardBorder, lineWidth: isSelected ? 2 : 1)
         )
         .shadow(color: isSelected ? Color.blue.opacity(0.15) : cardShadow, radius: 6, x: 0, y: 3)
         .scaleEffect(isSelected ? 0.97 : 1.0)
@@ -426,7 +390,7 @@ struct VenueCardPhoto: View {
         }
         .frame(height: 140)
         .frame(maxWidth: .infinity)
-        .background(Color.gray.opacity(0.08))
+        .background(Color(.systemGray6))
         .clipped()
         .cornerRadius(8)
         .task(id: venue.id ?? venue.title_photo ?? "") {
@@ -471,13 +435,13 @@ struct PhotoPlaceholder: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.gray.opacity(0.12), Color.gray.opacity(0.05)],
+                colors: [Color(.systemGray5), Color(.systemGray6)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             Image(systemName: "photo")
                 .font(.system(size: 28))
-                .foregroundColor(.gray.opacity(0.6))
+                .foregroundColor(Color(.systemGray2))
         }
     }
 }
@@ -517,7 +481,8 @@ final class ImageLoader: ObservableObject {
             kCGImageSourceThumbnailMaxPixelSize: maxPixelSize
         ]
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else { return nil }
+              let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
+        else { return nil }
         return UIImage(cgImage: cgImage)
     }
 }
@@ -570,6 +535,12 @@ struct VenueCostRow: View {
 #Preview {
     VenueListView()
         .environmentObject(FirebaseService())
+}
+
+#Preview("Dark Mode") {
+    VenueListView()
+        .environmentObject(FirebaseService())
+        .preferredColorScheme(.dark)
 }
 
 extension Array {

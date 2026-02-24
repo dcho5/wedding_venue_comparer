@@ -1,12 +1,6 @@
-// Utility to format numbers with commas
-function formatNumberWithCommas(value, decimals = 2) {
-  if (value === null || value === undefined || value === '') return '';
-  const num = Number(value);
-  if (isNaN(num)) return value;
-  return num.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-}
 import React, { useState, useEffect } from 'react';
 import { apiClient } from './api';
+import { formatMoney } from './venueUtils';
 
 export default function VenueForm({ venue, onSave, onCancel }) {
   const [formData, setFormData] = useState(
@@ -30,14 +24,12 @@ export default function VenueForm({ venue, onSave, onCancel }) {
   const [uploading, setUploading] = useState(false);
   const [titlePhotoId, setTitlePhotoId] = useState(null);
 
-  // Load photos when editing existing venue
   useEffect(() => {
     const loadPhotos = async () => {
       if (venue?.id) {
         try {
           const response = await apiClient.getPhotos(venue.id);
           setPhotos(response.data);
-          // Set title photo if venue has one
           if (venue.title_photo) {
             const titlePhoto = response.data.find(p => p.file_path === venue.title_photo || p.url === venue.title_photo);
             if (titlePhoto) setTitlePhotoId(titlePhoto.id);
@@ -52,22 +44,18 @@ export default function VenueForm({ venue, onSave, onCancel }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Keep notes and name as strings, convert numeric fields to numbers rounded to 2 decimals
     const isStringField = name === 'notes' || name === 'name';
     setFormData(prev => ({
       ...prev,
       [name]: isStringField
         ? value
-        : (isNaN(value)
-            ? value
-            : Math.round(parseFloat(value) * 100) / 100 || 0)
+        : (isNaN(value) ? value : Math.round(parseFloat(value) * 100) / 100 || 0)
     }));
   };
 
   const uploadFiles = async (files) => {
     if (!venue?.id) return;
     setUploading(true);
-
     try {
       for (const file of files) {
         const response = await apiClient.uploadPhoto(venue.id, file, '');
@@ -87,18 +75,14 @@ export default function VenueForm({ venue, onSave, onCancel }) {
   };
 
   const handleNumericKeyDown = (e) => {
-    // Allow: backspace, delete, tab, escape, enter, decimal point
     if ([8, 9, 27, 13, 46, 110, 190].indexOf(e.keyCode) !== -1 ||
-      // Allow: Ctrl/Cmd+A, Ctrl/Cmd+C, Ctrl/Cmd+V, Ctrl/Cmd+X
       (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
       (e.keyCode === 67 && (e.ctrlKey === true || e.metaKey === true)) ||
       (e.keyCode === 86 && (e.ctrlKey === true || e.metaKey === true)) ||
       (e.keyCode === 88 && (e.ctrlKey === true || e.metaKey === true)) ||
-      // Allow: home, end, left, right
       (e.keyCode >= 35 && e.keyCode <= 39)) {
       return;
     }
-    // Ensure that it is a number and stop the keypress
     if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
       e.preventDefault();
     }
@@ -122,7 +106,6 @@ export default function VenueForm({ venue, onSave, onCancel }) {
       alert('Venue name is required');
       return;
     }
-    // Find the title photo's file_path or url
     const titlePhoto = photos.find(p => p.id === titlePhotoId);
     const dataToSave = {
       ...formData,
@@ -148,7 +131,7 @@ export default function VenueForm({ venue, onSave, onCancel }) {
     <div className="modal" onClick={(e) => e.target.className === 'modal' && onCancel()}>
       <div className="modal-content">
         <h2>{venue ? 'Edit Venue' : 'Add Venue'}</h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-layout">
             <div className="left">
@@ -160,9 +143,9 @@ export default function VenueForm({ venue, onSave, onCancel }) {
                 <div className="title-photo-help muted">Tip: click any photo thumbnail below to mark it as the title photo.</div>
                 {titlePhotoId && (
                   <div id="titlePhotoPreview" className="title-photo-preview">
-                    <img 
-                      src={photos.find(p => p.id === titlePhotoId)?.url} 
-                      alt="Title" 
+                    <img
+                      src={photos.find(p => p.id === titlePhotoId)?.url}
+                      alt="Title"
                       className="title-thumb"
                     />
                   </div>
@@ -226,8 +209,8 @@ export default function VenueForm({ venue, onSave, onCancel }) {
                     📷 {uploading ? 'Uploading...' : 'Browse Photos'}
                   </button>
                 </div>
-                <div 
-                  id="dropZone" 
+                <div
+                  id="dropZone"
                   className="drop-zone"
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
@@ -237,39 +220,37 @@ export default function VenueForm({ venue, onSave, onCancel }) {
                   📸 Drag & drop photos here or click to browse
                 </div>
                 {photos.length > 0 && (
-                  <>
-                    <div id="photoPreview" className="photo-preview">
-                      {photos.map(photo => (
-                        <div 
-                          key={photo.id} 
-                          className={`thumb ${titlePhotoId === photo.id ? 'is-title' : ''}`}
-                          onClick={() => setTitlePhotoId(photo.id)}
-                          style={{ cursor: 'pointer', position: 'relative' }}
-                        >
-                          <img src={photo.url} alt="Venue" />
-                          <button
-                            type="button"
-                            className="remove-photo"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (confirm('Delete this photo?')) {
-                                try {
-                                  await apiClient.deletePhoto(venue.id, photo.id);
-                                  setPhotos(prev => prev.filter(p => p.id !== photo.id));
-                                  if (titlePhotoId === photo.id) setTitlePhotoId(null);
-                                } catch (error) {
-                                  console.error('Error deleting photo:', error);
-                                  alert('Failed to delete photo');
-                                }
+                  <div id="photoPreview" className="photo-preview">
+                    {photos.map(photo => (
+                      <div
+                        key={photo.id}
+                        className={`thumb ${titlePhotoId === photo.id ? 'is-title' : ''}`}
+                        onClick={() => setTitlePhotoId(photo.id)}
+                        style={{ cursor: 'pointer', position: 'relative' }}
+                      >
+                        <img src={photo.url} alt="Venue" />
+                        <button
+                          type="button"
+                          className="remove-photo"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (confirm('Delete this photo?')) {
+                              try {
+                                await apiClient.deletePhoto(venue.id, photo.id);
+                                setPhotos(prev => prev.filter(p => p.id !== photo.id));
+                                if (titlePhotoId === photo.id) setTitlePhotoId(null);
+                              } catch (error) {
+                                console.error('Error deleting photo:', error);
+                                alert('Failed to delete photo');
                               }
-                            }}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                            }
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
                 <span className="muted">{photos.length} photos</span>
               </div>
@@ -322,7 +303,7 @@ export default function VenueForm({ venue, onSave, onCancel }) {
                       onKeyDown={handleNumericKeyDown}
                       placeholder="$"
                     />
-                    <div className="muted">${formatNumberWithCommas(cateringTotal)}</div>
+                    <div className="muted">{formatMoney(cateringTotal)}</div>
                   </div>
                 </div>
 
@@ -353,7 +334,7 @@ export default function VenueForm({ venue, onSave, onCancel }) {
                       onKeyDown={handleNumericKeyDown}
                       placeholder="$"
                     />
-                    <div className="muted">${formatNumberWithCommas(barTotal)}</div>
+                    <div className="muted">{formatMoney(barTotal)}</div>
                   </div>
                 </div>
 
@@ -414,15 +395,15 @@ export default function VenueForm({ venue, onSave, onCancel }) {
 
               <div className="summary-panel">
                 <div>Summary</div>
-                <div className="total">${formatNumberWithCommas(totalCost)}</div>
-                <div className="muted">Per guest: ${formatNumberWithCommas(perGuestCost)}</div>
+                <div className="total">{formatMoney(totalCost)}</div>
+                <div className="muted">Per guest: {formatMoney(perGuestCost)}</div>
               </div>
             </div>
           </div>
 
           <div className="form-actions">
             <div className="spacer"></div>
-            <div>Total: <span>${formatNumberWithCommas(totalCost)}</span></div>
+            <div>Total: <span>{formatMoney(totalCost)}</span></div>
             <button type="submit">Save</button>
             <button type="button" onClick={onCancel}>Cancel</button>
           </div>

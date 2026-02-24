@@ -2,17 +2,25 @@
 
 A native iOS application for comparing wedding venues, built with **SwiftUI** and **Swift 6.0+**.
 
-> **TestFlight:** Coming soon. Release status and updates will be posted here.
+## 🎬 Demo
+
+<!-- Drag and drop a screen recording (.mp4 or .gif) here via the GitHub README editor -->
+*Demo video coming soon*
+
+---
 
 ## Features ✨
 
-- **Real-time Sync** with web app (Firestore)
-- **Venue Management** - Add, edit, delete venues
-- **Cost Breakdown** - Automatic calculations
-- **Photo Gallery** - Upload and manage venue photos
-- **Smart Comparison** - Side-by-side venue metrics with highlighting
-- **Firebase Auth** - Secure login/signup
-- **Offline Support** - Firestore offline persistence
+- **Real-time Sync** — Changes sync instantly with web app via Firestore
+- **Venue Management** — Add, edit, delete venues
+- **Cost Breakdown** — Automatic locale-aware cost calculations
+- **Photo Gallery** — Upload and manage venue photos with drag-to-reorder and lightbox view
+- **Smart Comparison** — Side-by-side venue metrics with best/worst highlighting
+- **Firebase Auth** — Secure email/password login and signup
+- **Dark Mode** — Full support via SwiftUI semantic colors
+- **Offline Support** — Firestore offline persistence
+
+---
 
 ## Architecture
 
@@ -31,35 +39,45 @@ WeddingVenueComparer/
 │   ├── FirebaseService.swift
 │   └── APIService.swift
 ├── Utilities/
-│   └── HighlightUtils.swift
+│   └── VenueUtils.swift        # Formatting, highlight logic
 ├── AppDelegate.swift
 └── WeddingVenueComparerApp.swift
 ```
 
+---
+
 ## Setup
 
-### 1. Prerequisites
+### Prerequisites
 - Xcode 15+ with iOS 15+ support
-- CocoaPods or Swift Package Manager
+- Swift Package Manager
 - Firebase account (using existing `wedding-venue-comparer` project)
 
-### 2. Install Dependencies
+### Install Dependencies
 Add via Swift Package Manager in Xcode:
 - `firebase-ios-sdk` (FirebaseAuth, FirebaseFirestore, FirebaseStorage)
-- Or use CocoaPods: `pod install`
 
-### 3. Firebase Configuration
-1. Download `GoogleService-Info.plist` from Firebase Console:
-   - Go to Project Settings → iOS app → Download plist
+### Firebase Configuration
+1. Download `GoogleService-Info.plist` from Firebase Console → Project Settings → iOS app
 2. Add to Xcode project (ensure "Copy items if needed" is checked)
 3. Verify bundle ID matches Firebase project setup
 
-### 4. Run
+### App Icon
+The master icon is at `assets/icon.png` (1024×1024) in the project root.
+
+To apply it in Xcode:
+1. Open `Assets.xcassets` → `AppIcon`
+2. Drag `assets/icon.png` into the **1024pt App Store** slot
+3. Xcode will offer to auto-generate all required sizes — accept
+
+### Run
 ```bash
 open WeddingVenueComparer.xcodeproj
 # Select WeddingVenueComparer scheme
 # Build and run on simulator or device
 ```
+
+---
 
 ## Shared Data Model
 
@@ -67,54 +85,33 @@ All fields match the web version exactly (snake_case in Firestore):
 
 ```swift
 struct Venue {
-    var id: String
+    var id: String?
     var name: String
     var guest_count: Int
-    var event_duration_hours: Int
+    var event_duration_hours: Double
     var venue_rental_cost: Double
     var catering_per_person: Double
     var catering_flat_fee: Double
-    var bar_per_person: Double
+    var bar_service_rate: Double       // NOTE: not bar_per_person
     var bar_flat_fee: Double
     var coordinator_fee: Double
     var event_insurance: Double
     var other_costs: Double
     var notes: String
-    var photos: [VenuePhoto]
-    var created_at: Timestamp
-    var updated_at: Timestamp
+    var title_photo: String?
+    var created_at: Timestamp?
+    var updated_at: Timestamp?
 }
 ```
 
-## Backend Integration
-
-The app uses **two strategies** simultaneously:
-
-1. **Firebase Realtime Sync** (Primary)
-   - Firestore for data storage
-   - Firebase Storage for photos
-   - Real-time listeners for instant updates
-
-2. **REST API** (Optional, via APIService)
-   - Backend URL: `https://wedding-venue-backend-dpe3ejr2ja-uc.a.run.app/api`
-   - Used for validation and additional business logic if needed
-
-## Cross-Platform Sync
-
-Changes are **instantly reflected** across platforms:
-- ✅ Add venue on iOS → appears on web
-- ✅ Edit venue on web → updates on iOS
-- ✅ Delete venue on iOS → removes from web
-- ✅ Upload photo on web → visible on iOS
-
-Powered by Firestore real-time listeners and shared database schema.
+---
 
 ## Cost Calculation
 
-Matches web app exactly:
+Matches web app exactly. Implemented as computed properties in `Venue.swift`:
 
 ```
-Total = Venue Rental 
+Total = Venue Rental
       + (Catering Rate × Guests + Catering Flat Fee)
       + (Bar Rate × Guests + Bar Flat Fee)
       + Coordinator Fee + Event Insurance + Other Costs
@@ -122,56 +119,97 @@ Total = Venue Rental
 Per Guest = Total ÷ Guest Count
 ```
 
-Implemented in `Venue.swift` computed properties.
+---
 
 ## Highlighting Logic
 
-Ported from web `highlightUtils.js` to Swift in `HighlightUtils.swift`:
-- 🟢 **Green** = Best value (lowest for costs)
-- 🔴 **Red** = Worst value (highest for costs)
-- ⚫ **Grey** = All values equal or neutral
+Ported from web `venueUtils.js` to Swift in `VenueUtils.swift`:
+
+| Value | Color | Meaning |
+|-------|-------|---------|
+| Lowest cost | 🟢 Green | Best value |
+| Highest cost | 🔴 Red | Worst value |
+| All equal (non-zero) | ⚫ Grey | Neutral |
+| All zero | — | No highlight |
+
+---
+
+## Currency Formatting
+
+All monetary values use `VenueUtils.formatMoney()`, which uses `NumberFormatter` with `.currency` style and `.current` locale — mirrors `formatMoney()` in `web/src/venueUtils.js`.
+
+---
+
+## Backend Integration
+
+The app uses two strategies simultaneously:
+
+1. **Firebase Realtime Sync** (Primary)
+   - Firestore for data storage
+   - Firebase Storage for photos
+   - Real-time listeners for instant updates
+
+2. **REST API** (via APIService)
+   - Backend URL: `https://wedding-venue-backend-dpe3ejr2ja-uc.a.run.app/api`
+   - Used for validation and additional business logic
+
+---
 
 ## Authentication
 
-- **Firebase Auth** - Email/password sign-up and sign-in
-- **User Isolation** - Each user's venues in `/users/{uid}/venues` subcollection
-- **Session Persistence** - Auth state saved across app launches
+- **Firebase Auth** — Email/password sign-up and sign-in
+- **User Isolation** — Each user's venues stored at `/users/{uid}/venues/`
+- **Session Persistence** — Auth state saved across app launches
+
+---
+
+## Cross-Platform Sync
+
+Changes sync instantly across platforms via Firestore real-time listeners:
+- ✅ Add venue on iOS → appears on web
+- ✅ Edit venue on web → updates on iOS immediately
+- ✅ Delete venue on iOS → removes from web
+- ✅ Upload photo on web → visible on iOS
+
+---
 
 ## Testing Cross-Platform Changes
 
-1. Make a change on iOS (e.g., add venue)
-2. Switch to web app in browser
-3. Refresh - changes appear instantly (Firestore real-time)
-4. Edit in web app
-5. Return to iOS - changes reflect immediately
+1. Add or edit a venue on iOS
+2. Switch to the web app and refresh — changes appear instantly
+3. Edit in the web app
+4. Return to iOS — changes reflect immediately (no refresh needed)
+
+---
 
 ## Known Limitations & TODOs
 
-- [ ] Photo upload UI (PHPickerViewController integration)
-- [ ] Offline mode (Firestore persistence enabled but not fully tested)
 - [ ] Unit tests for cost calculations
-- [ ] Dark mode support
 - [ ] iPad-specific layouts
 - [ ] VoiceOver accessibility labels
+- [ ] Offline mode (Firestore persistence enabled but not fully tested)
+
+---
 
 ## Related Projects
 
-- **Web App**: `../frontend/` (React)
-- **Backend API**: `../backend/` (Express)
-- **Android App**: `../android/` (Coming soon)
+- [Web App](../web/README.md)
+- [Backend API](../backend/README.md)
+- [Android App](../android/README.md) (coming soon)
+
+---
 
 ## Maintenance
 
 **When updating the web app:**
-- If Firestore schema changes → update `Venue.swift` model
-- If cost calculation changes → update `Venue.swift` computed properties
-- If highlighting logic changes → update `HighlightUtils.swift`
+- Schema changes → update `Venue.swift` model
+- Cost calculation changes → update computed properties in `Venue.swift`
+- Highlight/formatting logic changes → update `VenueUtils.swift`
 
-**Keep iOS and web in sync:**
-- Field names must match exactly (snake_case)
-- Cost formulas must be identical
-- Highlighting rules must be identical
+Field names, cost formulas, and highlighting rules must remain identical across all platforms.
+
+---
 
 ## License
 
-UNLICENSED - Private project
+UNLICENSED — Private project

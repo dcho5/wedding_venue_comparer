@@ -39,14 +39,14 @@ struct VenueComparisonView: View {
             switch self {
             case .best:    return Color(red: 0.06, green: 0.73, blue: 0.51).opacity(0.10)
             case .worst:   return Color(red: 0.94, green: 0.27, blue: 0.27).opacity(0.07)
-            case .neutral: return Color.gray.opacity(0.05)
+            case .neutral: return Color(.systemGray6)
             }
         }
         var border: Color {
             switch self {
             case .best:    return Color(red: 0.06, green: 0.73, blue: 0.51)
             case .worst:   return Color(red: 0.94, green: 0.27, blue: 0.27)
-            case .neutral: return Color.gray.opacity(0.2)
+            case .neutral: return Color(.separator)
             }
         }
         var valueColor: Color {
@@ -180,10 +180,6 @@ struct ComparisonCard: View {
     let photoURL: URL?
     let rank: VenueComparisonView.Rank
 
-    private func formatMoney(_ value: Double) -> String {
-        String(format: "$%.2f", value)
-    }
-
     private var durationString: String {
         venue.event_duration_hours.truncatingRemainder(dividingBy: 1) == 0
             ? String(Int(venue.event_duration_hours))
@@ -235,24 +231,24 @@ struct ComparisonCard: View {
                 Divider()
 
                 // Primary value
-                Text(formatMoney(metric.value(for: venue)))
+                Text(VenueUtils.formatMoney(metric.value(for: venue)))
                     .font(.system(size: 26, weight: .bold, design: .rounded))
                     .foregroundColor(rank.valueColor)
 
                 // Secondary
                 if metric == .cost {
-                    Text(formatMoney(venue.perGuestCost) + " / guest")
+                    Text(VenueUtils.formatMoney(venue.perGuestCost) + " / guest")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } else {
                     HStack(spacing: 8) {
-                        Text(formatMoney(venue.totalCost) + " total")
+                        Text(VenueUtils.formatMoney(venue.totalCost) + " total")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Text("·")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        Text(formatMoney(venue.perGuestCost) + " / guest")
+                        Text(VenueUtils.formatMoney(venue.perGuestCost) + " / guest")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -308,4 +304,18 @@ struct RoundedCorner: Shape {
             firebaseService: FirebaseService()
         )
     }
+}
+
+#Preview("Dark Mode") {
+    NavigationStack {
+        VenueComparisonView(
+            venues: [
+                Venue(name: "The Preserve at Canyon Lake", guest_count: 150, venue_rental_cost: 5000, catering_per_person: 75, bar_service_rate: 15),
+                Venue(name: "Hillside Manor", guest_count: 120, venue_rental_cost: 4200, catering_per_person: 85, bar_service_rate: 20),
+                Venue(name: "Garden Estate", guest_count: 200, venue_rental_cost: 7500, catering_per_person: 60, bar_service_rate: 12)
+            ],
+            firebaseService: FirebaseService()
+        )
+    }
+    .preferredColorScheme(.dark)
 }

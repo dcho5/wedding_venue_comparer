@@ -1,6 +1,6 @@
 import React from 'react';
 import VenuePhoto from './VenuePhoto';
-import { calculateBestWorst, getHighlightClass } from './highlightUtils';
+import { formatMoney, enrichVenue, calculateBestWorst, getHighlightClass } from './venueUtils';
 
 export default function VenueList({ venues, selectedVenues, onSelectVenue, onViewVenue, onEditVenue, loading }) {
 
@@ -10,19 +10,11 @@ export default function VenueList({ venues, selectedVenues, onSelectVenue, onVie
   const filteredVenues = venues.filter(v => v.name && v.name.trim() !== '');
 
   // Calculate totals for each venue
-  const mapped = filteredVenues.map(v => {
-    const guests = Number(v.guest_count || 0);
-    const catering = (Number(v.catering_per_person || 0) * guests) + Number(v.catering_flat_fee || 0);
-    const bar = (Number(v.bar_service_rate || 0) * guests) + Number(v.bar_flat_fee || 0);
-    const total = Number(v.venue_rental_cost || 0) + catering + bar + Number(v.coordinator_fee || 0) + Number(v.event_insurance || 0) + Number(v.other_costs || 0);
-    const perGuest = guests > 0 ? (total / guests) : 0;
-    return { ...v, catering, bar, total, perGuest };
-  });
+  const mapped = filteredVenues.map(enrichVenue);
 
   // Calculate min/max for highlighting
   const stats = calculateBestWorst(mapped, ['venue_rental_cost', 'catering', 'bar', 'coordinator_fee', 'event_insurance', 'other_costs', 'total']);
 
-  const formatMoney = (v) => `$${Number(v || 0).toFixed(2)}`;
 
   return (
     <div id="venuesContainer" className="venues">
@@ -41,7 +33,7 @@ export default function VenueList({ venues, selectedVenues, onSelectVenue, onVie
             {v.guest_count || 0} guests • {v.event_duration_hours || 0} hrs
             {v.photo_count > 0 && <span> • {v.photo_count} {v.photo_count === 1 ? 'photo' : 'photos'}</span>}
           </div>
-          
+
           <div className="costs">
             <div className={`cost-row ${getHighlightClass(v.venue_rental_cost, stats['venue_rental_cost'])}`}>
               <div>Rental</div>
